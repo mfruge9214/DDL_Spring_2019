@@ -66,20 +66,10 @@ int main(void)
   // enable interrupts after chip has been configured
   CORE_ATOMIC_IRQ_ENABLE();
 
-  for(int i=0; i<100000; i++);
-  write_I2C(BIT_RESOLUTION);
-//  for(int i=0; i<100000; i++);
-//
-//
-//  for(int i=0; i<100000; i++);
-//    read_I2C_Temp_Sensor();
 
   while (1) {
 	  Enter_Sleep();
-/*
-	  for(int i=0; i<100000; i++);
-	  ret=read_I2C();
-*/
+
 
   }
 }

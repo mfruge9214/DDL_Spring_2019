@@ -20,11 +20,8 @@ void i2c0_init(void)
 	I2C0 ->ROUTELOC0= I2C_ROUTELOC0_SCLLOC_LOC15 | I2C_ROUTELOC0_SDALOC_LOC15;
 	I2C0->ROUTEPEN= I2C_ROUTEPEN_SCLPEN | I2C_ROUTEPEN_SDAPEN;
 
-	// Enable I2C interrupts
+//	 Enable I2C interrupts
 //	 Done in the LPM_Enable function
-	I2C0->IFC = I2C_IFC_ACK;
-	I2C0->IEN |= I2C_IEN_ACK;
-	I2C0->IEN |= I2C_IEN_RXDATAV;
 
 	ACK_cont=false;
 	RXDATA_cont=false;

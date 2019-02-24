@@ -76,18 +76,29 @@ void letimer0_init(void){
 
 void LETIMER0_IRQHandler(void){
 	unsigned int int_flag;
+	float DegreesC;
 
 	CORE_ATOMIC_IRQ_DISABLE	();		// prevent nesting of interrupts for initial interrupt handling
 	int_flag = LETIMER0->IF;		// store cause of interrupt
 	LETIMER0->IFC = int_flag;		// clear cause  of interrupt
 
-	if ((int_flag & LETIMER_IFC_COMP1 ) != false) {
+	if (int_flag & LETIMER_IFC_COMP1) {
 //		GPIO_PinOutClear(LED0_port, LED0_pin);
 //		I2c Wake, read, sleep
-//		take_Measurement();
-		read_I2C_Temp_Sensor();
+		LPM_Enable();
+		take_Measurement();
+//		read_I2C_Temp_Sensor();
+		DegreesC=convert_temp(save_data);
+		if(DegreesC>CUTOFF_TEMP)
+		{
+			GPIO_PinOutSet(LED0_port, LED0_pin);
+		}
+		else{
+			GPIO_PinOutClear(LED0_port, LED0_pin);
+		}
+		LPM_Disable();
 	}
-	if ((int_flag & LETIMER_IFC_COMP0) != false) {
+	if (int_flag & LETIMER_IFC_COMP0) {
 //		GPIO_PinOutSet(LED0_port, LED0_pin);
 		GPIO_PinModeSet(SENSOR_ENABLE_PORT, SENSOR_ENABLE_PIN, gpioModePushPull, SENSOR_DEFAULT);
 
