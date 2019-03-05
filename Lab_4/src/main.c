@@ -31,15 +31,13 @@
 int main(void)
 {
   /* initialized variables */
-  UART_Transmit_OK=false;
-  UART_Receive_OK=false;
   event_trig=0;
 
   /* Declare local vars */
   char CMD[]="AT+NAMEmifr";
 //  i keeps track of characters sent
   int i=0;
-//  j keeps track of characters recieved
+//  j keeps track of characters received
   int j=0;
 
 
@@ -70,48 +68,64 @@ int main(void)
   gpio_init();
 
   /* Initialize LETIMER0 */
-//  letimer0_init();
+  letimer0_init();
 
-  // Initialize i2c0
-//  i2c0_init();
+//   Initialize i2c0
+  i2c0_init();
 
   /* Initialize LEUART */
   leuart0_init();
 
-//  LETIMER_Enable(LETIMER0, true);
-//  I2C_Enable(I2C0, true);
-  LEUART_Enable(LEUART0, true);
+  LETIMER_Enable(LETIMER0, true);
+  I2C_Enable(I2C0, true);
+//  LEUART_Enable(LEUART0, leuartEnable);
 
-
+  while(LEUART0->SYNCBUSY);
 
   // enable interrupts after chip has been configured
   CORE_ATOMIC_IRQ_ENABLE();
-//  Turn on TXBL interrupt for the scheduler
-  LEUART0->IEN |= LEUART_IEN_TXBL;
+
+//  Put CPU to sleep until interrupt
+  Enter_Sleep();
 
   while (1) {
 	  if(!event_trig){
 		  Enter_Sleep();
 	  }
+	  if(event_trig & LEUART_IF_RXDATAV )
+	  {
+	  // Receive data 1 byte at a time and store in the Data_Received array
+	  //  Clear event_trig
+		  event_trig &= ~(LEUART_IF_RXDATAV);
+		  Data_Received[j]=receive_Byte();
+		  j++;
+	//	Re-enable the interrupt if there are more bytes to be received
+		  if(j==11)
+		  {
+			  LEUART0->CMD &= ~(LEUART_CMD_RXEN);
+			  j=0;
+		  }
+		  else
+		  {
+			  LEUART0->IEN |= LEUART_IEN_RXDATAV;
+		  }
+	  }
 
-	  if(UART_Transmit_OK && (event_trig | LEUART_IF_TXBL))
+	  if(event_trig & LEUART_IF_TXBL)
 	  {
 //		 Transmit byte
 		  event_trig &= ~(LEUART_IF_TXBL);
 		  transmit_Byte(CMD[i]);
 		  i++;
-//		  Re-enable the interrupt
-		  LEUART0->IEN |= LEUART_IEN_TXBL;
-	  }
-	  if(UART_Receive_OK && (event_trig | LEUART_IF_RXDATAV))
-	  {
-//		  Receive data 1 byte at a time and store in the Data_Received array
-//		  Clear event_trig
-		  event_trig &= ~(LEUART_IF_RXDATAV);
-		  Data_Received[j]=receive_Byte();
-		  j++;
-//		  Re-enable the interrupt
-		  LEUART0->IEN |= LEUART_IEN_RXDATAV;
+//		  Re-enable the interrupt if more bits need to be sent
+		  if(i==11)
+		  {
+			  LEUART0->CMD &= ~(LEUART_CMD_TXEN);
+			  i=0;
+		  }
+		  else{
+			  LEUART0->IEN |= LEUART_IEN_TXBL;
+		  }
 	  }
   	}
  }

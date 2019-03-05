@@ -8,6 +8,7 @@
 #include "sleep_routines.h"
 #include "si7021.h"
 #include "i2c.h"
+#include "LEUART.h"
 
 //***********************************************************************************
 // defined files
@@ -83,6 +84,9 @@ void LETIMER0_IRQHandler(void){
 	LETIMER0->IFC = int_flag;		// clear cause  of interrupt
 
 	if (int_flag & LETIMER_IFC_COMP1) {
+//		GPIO_PinOutClear(LED0_port, LED0_pin);
+//		Enter_Sleep();
+
 		LPM_Enable();
 		take_Measurement();
 		DegreesC=convert_temp(save_data);
@@ -94,6 +98,9 @@ void LETIMER0_IRQHandler(void){
 			GPIO_PinOutClear(LED0_port, LED0_pin);
 		}
 		LPM_Disable();
+
+		LEUART_Enable(LEUART0, leuartEnable);
+		LEUART0->IEN |= LEUART_IEN_TXBL;
 	}
 	if (int_flag & LETIMER_IFC_COMP0) {
 //		GPIO_PinOutSet(LED0_port, LED0_pin);

@@ -31,7 +31,7 @@
 #define Letimer0_Period		5			// Turns on sensor enable
 #define Letimer0_On_Time	25			// Determines the amount of time until the sensor takes a measurement after LETIMER0_Period
 
-#define	Letimer0_EM			EM4			// define first energy mode that it cannot enter for LETIMER0
+#define	Letimer0_EM			EM3			// define first energy mode that it cannot enter for LETIMER0
 #define	Max_Sleep_Modes		6
 
 //***********************************************************************************
@@ -42,8 +42,6 @@
 
 uint8_t event_trig;
 char Data_Received [13];
-bool UART_Transmit_OK;
-bool UART_Receive_OK;
 
 
 unsigned int lowest_energy_mode[Max_Sleep_Modes];

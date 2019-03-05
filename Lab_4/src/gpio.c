@@ -45,7 +45,7 @@ void gpio_init(void){
 
 	// Set port and pins for LEUART and their drive strengths
 	GPIO_DriveStrengthSet(LEUART_RX_PORT, gpioDriveStrengthWeakAlternateWeak);
-	GPIO_DriveStrengthSet(LEUART_TX_PORT, gpioDriveStrengthWeakAlternateWeak);
+	GPIO_DriveStrengthSet(LEUART_TX_PORT, gpioDriveStrengthStrongAlternateWeak);
 	GPIO_PinModeSet(LEUART_TX_PORT, LEUART_TX_PIN, gpioModePushPull, 1);
 	GPIO_PinModeSet(LEUART_RX_PORT, LEUART_RX_PIN, gpioModeInput, 0);
 
