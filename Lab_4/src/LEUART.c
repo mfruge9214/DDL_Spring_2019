@@ -69,3 +69,60 @@ void LEUART0_IRQHandler(){
 	}
 	CORE_ATOMIC_IRQ_ENABLE();
 }
+
+void Temp_to_ASCII(float temp)
+{
+	int j=0;
+	int i=0;
+	int temp_int;
+	int integer_places=1;
+	int working;
+	int num_zeros=3;
+//	Assign the + or - to global variable
+	if(temp>0)
+	{
+		Bluetooth_CMD[i]=0x2B;
+	}
+	else{
+		Bluetooth_CMD[i]=0x2D;
+	}
+	i++;
+
+//	Figure out how many digits go in front of the decimal
+	while(integer_places<temp)
+	{
+		integer_places=integer_places*10;
+		num_zeros--;
+	}
+	// Fill in the leading zeros of the number we need to send
+	for(j=0; j<num_zeros; j++)
+	{
+		Bluetooth_CMD[i+j]=0x30;
+	}
+//	Keep index continuous so we don't overwrite characters
+	i=i+j;
+	//	Get tenths place resolution
+	temp_int= temp*10;
+
+	while(integer_places>0)
+	{
+//		Get the integer we need to send
+		working=temp_int/integer_places;
+//		Convert to ascii
+		working += 0x30;
+//		Add to String to send
+		Bluetooth_CMD[i]=working;
+		i++;
+//		Get next digit
+		temp_int=temp_int%integer_places;
+		integer_places= integer_places/10;
+		// After we put in the 1's place, isert a decimal
+		if(integer_places==1)
+		{
+			Bluetooth_CMD[i]=0x2E;
+			i++;
+		}
+	}
+	Bluetooth_CMD[i]=0x43;
+//	CMD_length=sizeof(Bluetooth_CMD)/sizeof(int);
+}

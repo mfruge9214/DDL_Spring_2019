@@ -42,6 +42,8 @@ void LPM_Disable()
 	GPIO_PinOutClear(SENSOR_ENABLE_PORT, SENSOR_ENABLE_PIN);
 }
 
+
+
 float convert_temp(uint16_t temp_code)
 {
 	float degrees;

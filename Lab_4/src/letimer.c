@@ -77,7 +77,6 @@ void letimer0_init(void){
 
 void LETIMER0_IRQHandler(void){
 	unsigned int int_flag;
-	float DegreesC;
 
 	CORE_ATOMIC_IRQ_DISABLE	();		// prevent nesting of interrupts for initial interrupt handling
 	int_flag = LETIMER0->IF;		// store cause of interrupt
@@ -86,21 +85,7 @@ void LETIMER0_IRQHandler(void){
 	if (int_flag & LETIMER_IFC_COMP1) {
 //		GPIO_PinOutClear(LED0_port, LED0_pin);
 //		Enter_Sleep();
-
-		LPM_Enable();
-		take_Measurement();
-		DegreesC=convert_temp(save_data);
-		if(DegreesC>CUTOFF_TEMP)
-		{
-			GPIO_PinOutSet(LED0_port, LED0_pin);
-		}
-		else{
-			GPIO_PinOutClear(LED0_port, LED0_pin);
-		}
-		LPM_Disable();
-
-		LEUART_Enable(LEUART0, leuartEnable);
-		LEUART0->IEN |= LEUART_IEN_TXBL;
+		event_trig |= COMP1_EVENT_MASK;
 	}
 	if (int_flag & LETIMER_IFC_COMP0) {
 //		GPIO_PinOutSet(LED0_port, LED0_pin);

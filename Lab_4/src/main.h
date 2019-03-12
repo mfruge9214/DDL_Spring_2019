@@ -33,17 +33,18 @@
 
 #define	Letimer0_EM			EM3			// define first energy mode that it cannot enter for LETIMER0
 #define	Max_Sleep_Modes		6
-
+#define COMP1_EVENT_MASK	0x1		// Comp1 mask to set event trig
+#define CMD_length			7
 //***********************************************************************************
 // global variables
 //***********************************************************************************
 
-/* Global Variables for LEUART.c */
+/* Global Variables for Program */
 
 uint8_t event_trig;
 char Data_Received [13];
 
-
+char Bluetooth_CMD[CMD_length];
 unsigned int lowest_energy_mode[Max_Sleep_Modes];
 
 //***********************************************************************************
