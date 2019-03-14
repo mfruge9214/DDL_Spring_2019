@@ -15,7 +15,7 @@ void leuart0_init(void){
 	leuart_init.stopbits=leuartStopbits1;	// 1 stop bit
 
 	LEUART_Init(LEUART0, &leuart_init);
-
+	while(LEUART0->SYNCBUSY);
 	/* Route the pins for the LEUART0 to output to the pins on the board */
 	// The pins for RX and TX on the board are 13 and 11
 	LEUART0->ROUTELOC0=LEUART_ROUTELOC0_RXLOC_LOC18 | LEUART_ROUTELOC0_TXLOC_LOC18;
@@ -29,13 +29,18 @@ void leuart0_init(void){
 //	Enable read from TXDATA transmission
 //	LEUART0->CTRL |= LEUART_CTRL_LOOPBK;
 
+
 	NVIC_EnableIRQ(LEUART0_IRQn);
 }
 
 
 void transmit_Byte(char byte){
 	while(LEUART0->SYNCBUSY);
-	LEUART0->TXDATA= byte;
+	if(byte != NULL)
+	{
+		LEUART0->TXDATA= byte;
+	}
+	else return;
 }
 
 
@@ -52,6 +57,8 @@ void LEUART0_IRQHandler(){
 	LEUART0->IFC=int_flag;
 
 	CORE_ATOMIC_IRQ_DISABLE();
+	while(LEUART0->SYNCBUSY);
+
 
 	if(int_flag & LEUART_IF_TXBL){
 //		Set transmitter Enable Status to 1
@@ -85,6 +92,7 @@ void Temp_to_ASCII(float temp)
 	}
 	else{
 		Bluetooth_CMD[i]=0x2D;
+		temp= temp * -1;
 	}
 	i++;
 
@@ -101,6 +109,13 @@ void Temp_to_ASCII(float temp)
 	}
 //	Keep index continuous so we don't overwrite characters
 	i=i+j;
+//	Num_zeeros is only equal to 3 if the absolute value of the temp is less than 1
+//	Handle special case of -1<temp<1
+	if(num_zeros==3)
+	{
+		Bluetooth_CMD[i]=0x2E;
+		i++;
+	}
 	//	Get tenths place resolution
 	temp_int= temp*10;
 
@@ -116,13 +131,14 @@ void Temp_to_ASCII(float temp)
 //		Get next digit
 		temp_int=temp_int%integer_places;
 		integer_places= integer_places/10;
-		// After we put in the 1's place, isert a decimal
+		// After we put in the 1's place, insert a decimal
 		if(integer_places==1)
 		{
-			Bluetooth_CMD[i]=0x2E;
+			Bluetooth_CMD[i]='.';
 			i++;
 		}
 	}
-	Bluetooth_CMD[i]=0x43;
-//	CMD_length=sizeof(Bluetooth_CMD)/sizeof(int);
+	Bluetooth_CMD[i++]='C';
+	Bluetooth_CMD[i]='\0';
+	return;
 }

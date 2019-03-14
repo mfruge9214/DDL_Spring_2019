@@ -93,20 +93,43 @@ int main(void)
 
   while (1) {
 	  if(!event_trig){
+//		  TxBytes=0;
+//		  RxBytes=0;
 		  Enter_Sleep();
 	  }
+
+	  if(event_trig & LEUART_IF_TXBL)
+	  {
+
+		  LEUART0->CMD |= LEUART_CMD_CLEARTX;
+//		 Transmit byte
+		  event_trig &= ~(LEUART_IF_TXBL);
+		  for(i=0; i<10000; i++);
+		  transmit_Byte(CMD[TxBytes]);
+		  TxBytes++;
+//		  Re-enable the interrupt if more bits need to be sent
+//		  if(i==CMD_length)
+		  if(TxBytes>CMD_length)
+		  {
+			  LEUART0->CMD = LEUART_CMD_TXDIS;
+      		  TxBytes=0;
+		  }
+		  else{
+			  LEUART0->IEN |= LEUART_IEN_TXBL;
+		  }
+	  }
+
 	  if(event_trig & LEUART_IF_RXDATAV )
 	  {
 	  // Receive data 1 byte at a time and store in the Data_Received array
 	  //  Clear event_trig
 		  event_trig &= ~(LEUART_IF_RXDATAV);
 		  Data_Received[RxBytes]=receive_Byte();
-		  RxBytes++;
+//		  RxBytes++;
 	//	Re-enable the interrupt if there are more bytes to be received
-//		  if(j==CMD_length)
-		  if(RxBytes==strlen(CMD))
+		  if(RxBytes>=CMD_length)
 		  {
-			  LEUART0->CMD &= ~(LEUART_CMD_RXEN);
+			  LEUART0->CMD = LEUART_CMD_RXDIS;
 			  RxBytes=0;
 		  }
 		  else
@@ -115,40 +138,30 @@ int main(void)
 		  }
 	  }
 
-	  if(event_trig & LEUART_IF_TXBL)
-	  {
-//		 Transmit byte
-		  event_trig &= ~(LEUART_IF_TXBL);
-		  transmit_Byte(CMD[TxBytes]);
-		  TxBytes++;
-//		  Re-enable the interrupt if more bits need to be sent
-//		  if(i==CMD_length)
-		  if(TxBytes==strlen(CMD))
-		  {
-			  LEUART0->CMD &= ~(LEUART_CMD_TXEN);
-			  TxBytes=0;
-		  }
-		  else{
-			  LEUART0->IEN |= LEUART_IEN_TXBL;
-		  }
-	  }
 	  if(event_trig & COMP1_EVENT_MASK){
 		  event_trig &= ~(COMP1_EVENT_MASK);
+		  RxBytes=0;
+		  TxBytes=0;
 		  LPM_Enable();
 		  take_Measurement();
 		  DegreesC=convert_temp(save_data);
-		  if(DegreesC<CUTOFF_TEMP)
-		  {
-			  GPIO_PinOutSet(LED0_port, LED0_pin);
-		  }
-		  else{
-			  GPIO_PinOutClear(LED0_port, LED0_pin);
-		  }
+//		  if(DegreesC<CUTOFF_TEMP)
+//		  {
+//			  GPIO_PinOutSet(LED0_port, LED0_pin);
+//		  }
+//		  else{
+//			  GPIO_PinOutClear(LED0_port, LED0_pin);
+//		  }
 		  LPM_Disable();
 		  Temp_to_ASCII(DegreesC);
-		  for (i=0; i<CMD_length; i++) CMD[i]=Bluetooth_CMD[i];
+		  for (i=0;i<8; i++) CMD[i]=Bluetooth_CMD[i];
+		  CMD[i]='\0';
+		  i=0;
 		  LEUART_Enable(LEUART0, leuartEnable);
+//		  LEUART0->CMD |= LEUART_CMD_CLEARRX | LEUART_CMD_CLEARTX;
 		  LEUART0->IEN |= LEUART_IEN_TXBL;
+		 // LEUART0->IEN |= LEUART_IEN_RXDATAV;
 	  }
+
   	}
  }

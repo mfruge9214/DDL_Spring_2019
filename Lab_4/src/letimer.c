@@ -89,6 +89,7 @@ void LETIMER0_IRQHandler(void){
 	}
 	if (int_flag & LETIMER_IFC_COMP0) {
 //		GPIO_PinOutSet(LED0_port, LED0_pin);
+//		event_trig |= COMP0_EVENT_MASK;
 		GPIO_PinModeSet(SENSOR_ENABLE_PORT, SENSOR_ENABLE_PIN, gpioModePushPull, SENSOR_DEFAULT);
 
 	}

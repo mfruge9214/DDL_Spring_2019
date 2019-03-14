@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
 #include "em_core.h"
 #include "em_device.h"
 #include "em_chip.h"
@@ -33,8 +34,14 @@
 
 #define	Letimer0_EM			EM3			// define first energy mode that it cannot enter for LETIMER0
 #define	Max_Sleep_Modes		6
+
+
 #define COMP1_EVENT_MASK	0x1		// Comp1 mask to set event trig
-#define CMD_length			7
+#define COMP0_EVENT_MASK	0x10	// Comp0 mask...
+// TX and RX as well
+
+
+#define CMD_length			8
 //***********************************************************************************
 // global variables
 //***********************************************************************************
@@ -42,7 +49,7 @@
 /* Global Variables for Program */
 
 uint8_t event_trig;
-char Data_Received [13];
+char Data_Received [CMD_length];
 
 char Bluetooth_CMD[CMD_length];
 unsigned int lowest_energy_mode[Max_Sleep_Modes];
